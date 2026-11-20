@@ -7,6 +7,25 @@
     <language>en</language>
 
     <item>
+      <title>Version 1.0.5</title>
+      <link>https://github.com/RamiruWanigathunga/OnTime/releases/tag/v1.0.5</link>
+      <sparkle:version>6</sparkle:version>
+      <sparkle:shortVersionString>1.0.5</sparkle:shortVersionString>
+      <description><![CDATA[
+        <h2>OnTime 1.0.5</h2><ul><li>Maintenance and improvements.</li></ul>
+      ]]></description>
+      <pubDate>Fri, 20 Nov 2026 19:39:28 +0000</pubDate>
+      <enclosure
+        url="https://github.com/RamiruWanigathunga/OnTime/releases/download/v1.0.5/OnTime-v1.0.5.zip"
+        sparkle:version="6"
+        sparkle:shortVersionString="1.0.5"
+        sparkle:edSignature="MUcGXivVcow6UPE7w6ZWCwglVZf+MzJLAvWPIjg+gxKovRzyk+mEo+G738t7Jy3lReto4BzPpMkjjgQJdh92DQ=="
+        length="14703089"
+        type="application/octet-stream" />
+    </item>
+
+
+    <item>
       <title>Version 1.0.4</title>
       <link>https://github.com/RamiruWanigathunga/OnTime/releases/tag/v1.0.4</link>
       <sparkle:version>5</sparkle:version>
