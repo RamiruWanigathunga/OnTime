@@ -73,11 +73,10 @@ build once the first appcast item is live.
 4. Watch **Actions → Release**. When green: ZIP + DMG on the Release page, and
    a new `appcast.xml` item on `main`.
 
-Release builds ad-hoc sign via Xcode (`CODE_SIGN_IDENTITY=-`), restore Sparkle
-headers if needed, and verify `codesign --deep --strict`. Do not strip to
-unsigned; do not `codesign --deep` on the whole app. Sparkle updates use
-**EdDSA**. Without notarization, first browser install may need
-`xattr -cr /Applications/OnTime.app`.
+Release builds use Xcode ad-hoc signing (`CODE_SIGN_IDENTITY=-`), same as
+GitStreak — that re-seals Sparkle after header stripping. CI verifies with
+`codesign --verify --deep --strict`. Sparkle updates use **EdDSA**. Without
+notarization, first browser install may need `xattr -cr /Applications/OnTime.app`.
 
 ### Manual local packaging (optional)
 

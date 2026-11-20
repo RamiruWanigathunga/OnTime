@@ -47,8 +47,7 @@ jobs:
       - name: Build app (ad-hoc via Xcode)
         run: |
           # CODE_SIGN_IDENTITY=- (like GitStreak): Xcode re-seals Sparkle after
-          # stripping headers. We still restore headers + re-sign below as a
-          # belt-and-suspenders check for Gatekeeper.
+          # stripping headers so Gatekeeper won't call the app "damaged".
           xcodebuild \
             -project OnTime.xcodeproj \
             -scheme OnTime \
@@ -75,41 +74,16 @@ jobs:
           ZIP="dist/OnTime-v${VERSION}.zip"
           DMG="dist/OnTime-v${VERSION}.dmg"
 
-          # Xcode embeds Sparkle without Headers/Modules/PrivateHeaders, which
-          # breaks Sparkle.framework's sealed resources → Gatekeeper "damaged".
-          # Restore those dirs from the SPM xcframework artifact (same bytes
-          # Sparkle signed), then ad-hoc sign only our app — never --deep.
-          SPARKLE_DST="${APP}/Contents/Frameworks/Sparkle.framework"
-          SPARKLE_SRC="$(find build/SourcePackages/artifacts -path '*/macos-arm64_x86_64/Sparkle.framework' -type d | head -1)"
-          if [[ -z "${SPARKLE_SRC}" || ! -d "${SPARKLE_SRC}" ]]; then
-            echo "Sparkle.framework artifact not found under build/SourcePackages/artifacts" >&2
-            find build/SourcePackages -name 'Sparkle.framework' -type d 2>/dev/null || true
-            exit 1
-          fi
-          SPARKLE_VER="$(readlink "${SPARKLE_DST}/Versions/Current" 2>/dev/null || echo B)"
-          SPARKLE_VER_DIR="${SPARKLE_DST}/Versions/${SPARKLE_VER}"
-          for part in Headers Modules PrivateHeaders; do
-            rm -rf "${SPARKLE_VER_DIR}/${part}"
-            cp -R "${SPARKLE_SRC}/Versions/Current/${part}" "${SPARKLE_VER_DIR}/${part}"
-            ln -sfn "Versions/Current/${part}" "${SPARKLE_DST}/${part}"
-          done
-          codesign --verify --deep --strict --verbose=2 "${SPARKLE_DST}"
-
-          codesign --force --sign - "${APP}/Contents/MacOS/OnTime"
-          while IFS= read -r -d '' bundle; do
-            case "${bundle}" in
-              *Sparkle.framework*) continue ;;
-            esac
-            codesign --force --sign - "${bundle}"
-          done < <(find "${APP}" \( -name '*.bundle' -o -name '*.framework' \) -print0)
-          codesign --force --sign - "${APP}"
+          # With CODE_SIGN_IDENTITY="-", Xcode already ad-hoc signed the app and
+          # re-sealed Sparkle after stripping Headers (same as GitStreak). Do not
+          # copy headers back — that invalidates the seal. Never codesign --deep.
           codesign --verify --deep --strict --verbose=2 "${APP}"
           codesign -dv --verbose=2 "${APP}" 2>&1 | tee /tmp/ontime-codesign.txt
           if ! grep -q 'Signature=adhoc' /tmp/ontime-codesign.txt; then
             echo "Expected ad-hoc signature on OnTime.app" >&2
             exit 1
           fi
-          echo "Ad-hoc signed OnTime.app (Sparkle sealed resources restored)."
+          echo "Xcode ad-hoc signature verified (Sparkle re-sealed by build)."
 
           ditto -c -k --sequesterRsrc --keepParent "${APP}" "${ZIP}"
           bash scripts/make-dmg.sh "${APP}" "${DMG}"
