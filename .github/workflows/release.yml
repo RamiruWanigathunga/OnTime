@@ -33,20 +33,31 @@ jobs:
         id: meta
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          # Sparkle compares integer build numbers; run_number always increases.
-          BUILD="${{ github.run_number }}"
+          # Sparkle compares integer CFBundleVersion. Source of truth: xcodeproj
+          # (bump CURRENT_PROJECT_VERSION for every public release).
+          BUILD="$(sed -n 's/.*CURRENT_PROJECT_VERSION = \([0-9][0-9]*\);/\1/p' OnTime.xcodeproj/project.pbxproj | head -1)"
+          if [[ -z "${BUILD}" ]]; then
+            echo "Could not read CURRENT_PROJECT_VERSION from project.pbxproj" >&2
+            exit 1
+          fi
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
           echo "build=${BUILD}" >> "${GITHUB_OUTPUT}"
+          echo "Releasing OnTime ${VERSION} (build ${BUILD})"
 
-      - name: Build app (unsigned)
+      - name: Build app (ad-hoc via Xcode)
         run: |
+          # CODE_SIGN_IDENTITY=- (like GitStreak): Xcode re-seals Sparkle after
+          # stripping headers. We still restore headers + re-sign below as a
+          # belt-and-suspenders check for Gatekeeper.
           xcodebuild \
             -project OnTime.xcodeproj \
             -scheme OnTime \
             -configuration Release \
             -destination 'generic/platform=macOS' \
             -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
             MARKETING_VERSION="${{ steps.meta.outputs.version }}" \
             CURRENT_PROJECT_VERSION="${{ steps.meta.outputs.build }}"
 
@@ -162,12 +173,14 @@ jobs:
             Or use **`OnTime-v${{ steps.meta.outputs.version }}.zip`** (also used by in-app Sparkle updates).
 
             > [!IMPORTANT]
-            > **Gatekeeper (unsigned / non-notarized build)**
+            > **Gatekeeper (ad-hoc / non-notarized build)**
             >
-            > This release is not notarized with a paid Apple Developer ID. On first launch macOS may show *“Apple could not verify OnTime”*:
+            > Not notarized with a paid Apple Developer ID. After a browser download:
             >
-            > 1. Prefer dragging the app to `/Applications` before opening it.
-            > 2. Open **System Settings → Privacy & Security**, then **Open Anyway**, or right-click the app → **Open** → **Open**.
+            > 1. Drag **OnTime** to `/Applications` before opening (don’t launch from the DMG).
+            > 2. If you see *“is damaged”* or *“could not verify”*:
+            >    `xattr -cr /Applications/OnTime.app && open /Applications/OnTime.app`
+            > 3. Or **System Settings → Privacy & Security → Open Anyway** / right-click → **Open**.
 
             ### Requirements
 

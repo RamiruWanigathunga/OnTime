@@ -60,22 +60,24 @@ build once the first appcast item is live.
 ### Cut a release
 
 1. Ensure `main` is clean and pushed.
-2. Tag and push (marketing version = tag without `v`):
+2. Bump **both** `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` in the
+   Xcode project (Sparkle uses the integer build; it must increase every time).
+   Commit that bump.
+3. Tag and push (marketing version = tag without `v`):
 
    ```bash
    git tag v1.0.0
    git push origin v1.0.0
    ```
 
-3. Watch **Actions → Release**. When green, the Release page has
-   `OnTime-vX.Y.Z.zip` + `OnTime-vX.Y.Z.dmg`, and `appcast.xml` on `main` has a
-   new item. Build number = Actions `run_number` (always increasing for Sparkle).
+4. Watch **Actions → Release**. When green: ZIP + DMG on the Release page, and
+   a new `appcast.xml` item on `main`.
 
-Release builds restore Sparkle’s `Headers`/`Modules`/`PrivateHeaders` (Xcode
-strips them and breaks the sealed signature → Gatekeeper “damaged”), then
-**ad-hoc sign** the app. Do not strip to unsigned; do not `codesign --deep`.
-Sparkle updates still verify with **EdDSA**. Notarization needs a paid
-Developer ID; until then users may need `xattr -cr` once after download.
+Release builds ad-hoc sign via Xcode (`CODE_SIGN_IDENTITY=-`), restore Sparkle
+headers if needed, and verify `codesign --deep --strict`. Do not strip to
+unsigned; do not `codesign --deep` on the whole app. Sparkle updates use
+**EdDSA**. Without notarization, first browser install may need
+`xattr -cr /Applications/OnTime.app`.
 
 ### Manual local packaging (optional)
 
