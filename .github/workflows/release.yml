@@ -63,6 +63,20 @@ jobs:
           mkdir -p dist
           ZIP="dist/OnTime-v${VERSION}.zip"
           DMG="dist/OnTime-v${VERSION}.dmg"
+
+          # Xcode still stamps an ad-hoc/linker signature when CODE_SIGNING_ALLOWED=NO.
+          # Sparkle then treats the update as Apple-code-signed, fails to match the
+          # previous ad-hoc identity, and rejects the install even when EdDSA is valid.
+          # Strip only our app binary/bundle — leave Sparkle.framework signatures intact.
+          codesign --remove-signature "${APP}/Contents/MacOS/OnTime" 2>/dev/null || true
+          codesign --remove-signature "${APP}" 2>/dev/null || true
+          if codesign -dv "${APP}" 2>&1 | grep -qi 'Signature=adhoc\|linker-signed'; then
+            echo "Warning: app still appears ad-hoc signed after strip" >&2
+            codesign -dv --verbose=2 "${APP}" 2>&1 || true
+          else
+            echo "App Apple code signature removed; Sparkle will rely on EdDSA."
+          fi
+
           ditto -c -k --sequesterRsrc --keepParent "${APP}" "${ZIP}"
           bash scripts/make-dmg.sh "${APP}" "${DMG}"
           ls -lh "${ZIP}" "${DMG}"
