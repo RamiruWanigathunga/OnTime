@@ -64,18 +64,25 @@ jobs:
           ZIP="dist/OnTime-v${VERSION}.zip"
           DMG="dist/OnTime-v${VERSION}.dmg"
 
-          # Xcode still stamps an ad-hoc/linker signature when CODE_SIGNING_ALLOWED=NO.
-          # Sparkle then treats the update as Apple-code-signed, fails to match the
-          # previous ad-hoc identity, and rejects the install even when EdDSA is valid.
-          # Strip only our app binary/bundle — leave Sparkle.framework signatures intact.
-          codesign --remove-signature "${APP}/Contents/MacOS/OnTime" 2>/dev/null || true
-          codesign --remove-signature "${APP}" 2>/dev/null || true
-          if codesign -dv "${APP}" 2>&1 | grep -qi 'Signature=adhoc\|linker-signed'; then
-            echo "Warning: app still appears ad-hoc signed after strip" >&2
-            codesign -dv --verbose=2 "${APP}" 2>&1 || true
-          else
-            echo "App Apple code signature removed; Sparkle will rely on EdDSA."
+          # Apple Silicon refuses completely unsigned apps (instant kill). A bare
+          # linker stamp also leaves the bundle without sealed resources. Ad-hoc
+          # sign our binary + app (and non-Sparkle bundles). Do NOT --deep: leave
+          # Sparkle.framework's nested XPC signatures intact. Sparkle updates still
+          # validate via EdDSA when Apple identities don't match.
+          codesign --force --sign - "${APP}/Contents/MacOS/OnTime"
+          while IFS= read -r -d '' bundle; do
+            case "${bundle}" in
+              *Sparkle.framework*) continue ;;
+            esac
+            codesign --force --sign - "${bundle}"
+          done < <(find "${APP}" \( -name '*.bundle' -o -name '*.framework' \) -print0)
+          codesign --force --sign - "${APP}"
+          codesign -dv --verbose=2 "${APP}" 2>&1 | tee /tmp/ontime-codesign.txt
+          if ! grep -q 'Signature=adhoc' /tmp/ontime-codesign.txt; then
+            echo "Expected ad-hoc signature on OnTime.app" >&2
+            exit 1
           fi
+          echo "Ad-hoc signed OnTime.app for launch; Sparkle will rely on EdDSA for updates."
 
           ditto -c -k --sequesterRsrc --keepParent "${APP}" "${ZIP}"
           bash scripts/make-dmg.sh "${APP}" "${DMG}"
