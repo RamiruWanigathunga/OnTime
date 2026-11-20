@@ -71,10 +71,11 @@ build once the first appcast item is live.
    `OnTime-vX.Y.Z.zip` + `OnTime-vX.Y.Z.dmg`, and `appcast.xml` on `main` has a
    new item. Build number = Actions `run_number` (always increasing for Sparkle).
 
-Release builds **ad-hoc sign** the app (not Developer ID) so it can launch on
-Apple Silicon. Do not strip signatures to nothing — unsigned apps are killed by
-macOS. Do not `codesign --deep` (would break Sparkle’s nested XPCs). Sparkle
-still verifies updates with **EdDSA** when Apple identities don’t match.
+Release builds restore Sparkle’s `Headers`/`Modules`/`PrivateHeaders` (Xcode
+strips them and breaks the sealed signature → Gatekeeper “damaged”), then
+**ad-hoc sign** the app. Do not strip to unsigned; do not `codesign --deep`.
+Sparkle updates still verify with **EdDSA**. Notarization needs a paid
+Developer ID; until then users may need `xattr -cr` once after download.
 
 ### Manual local packaging (optional)
 

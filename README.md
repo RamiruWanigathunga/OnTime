@@ -48,15 +48,22 @@ macOS 14 (Sonoma) or later.
 3. Launch OnTime from `/Applications`.
 
 > [!IMPORTANT]
-> **Gatekeeper (unsigned / non-notarized builds)**
+> **Gatekeeper (ad-hoc / non-notarized builds)**
 >
 > Until releases are notarized with a paid Apple Developer ID, macOS may block
-> the first launch:
+> the first launch after a browser download:
 >
-> 1. Prefer dragging the app to `/Applications` before opening it.
-> 2. If you see *“Apple could not verify OnTime”*, open **System Settings →
->    Privacy & Security**, then **Open Anyway**, or right-click the app →
->    **Open** → **Open**.
+> 1. Drag `OnTime.app` to `/Applications` before opening it.
+> 2. If you see *“OnTime.app is damaged”* or *“Apple could not verify OnTime”*,
+>    clear the quarantine flag, then open again:
+>
+>    ```bash
+>    xattr -cr /Applications/OnTime.app
+>    open /Applications/OnTime.app
+>    ```
+>
+> 3. Or right-click the app → **Open** → **Open**, or use **System Settings →
+>    Privacy & Security → Open Anyway**.
 
 ### Option 2: Build from source
 
