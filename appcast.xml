@@ -5,24 +5,6 @@
     <link>https://raw.githubusercontent.com/RamiruWanigathunga/OnTime/main/appcast.xml</link>
     <description>Most recent updates to OnTime</description>
     <language>en</language>
-
-    <item>
-      <title>Version 1.0.0</title>
-      <link>https://github.com/RamiruWanigathunga/OnTime/releases/tag/v1.0.0</link>
-      <sparkle:version>1</sparkle:version>
-      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
-      <description><![CDATA[
-        <h2>OnTime 1.0.0</h2><ul><li>Maintenance and improvements.</li></ul>
-      ]]></description>
-      <pubDate>Fri, 20 Nov 2026 19:49:12 +0000</pubDate>
-      <enclosure
-        url="https://github.com/RamiruWanigathunga/OnTime/releases/download/v1.0.0/OnTime-v1.0.0.zip"
-        sparkle:version="1"
-        sparkle:shortVersionString="1.0.0"
-        sparkle:edSignature="eKdJSmInAmlx0VP6XUooyK1qTigBdH900RX1YxFHVMlwCOYP4BlLn8G02JoaGRBYXr2GMCs/Y0APISksB6sUAQ=="
-        length="14626927"
-        type="application/octet-stream" />
-    </item>
-
-</channel>
+    <!-- No items yet. CI / scripts/update_appcast.py insert after this language tag. -->
+  </channel>
 </rss>
