@@ -16,7 +16,7 @@ struct OnTimeTimerSettingsPane: View {
 
   var body: some View {
     SettingsPaneScroll {
-      SettingsSectionLabel(title: "Durations in minutes")
+      SettingsSectionLabel(title: "Pomodoro durations (minutes)")
       SettingsSectionCard {
         timerNumberRow(
           "Work interval",

@@ -7,7 +7,7 @@ final class SettingsLiquidGlassTests: XCTestCase {
   func testSidebarOrderExcludesAbout() {
     XCTAssertEqual(
       OnTimeSettingsPane.sidebarOrder.map(\.title),
-      ["General", "Appearance", "Timer", "Sound", "Shortcuts"]
+      ["General", "Appearance", "Pomodoro", "Sound", "Shortcuts"]
     )
     XCTAssertEqual(OnTimeSettingsPane.about.title, "About")
   }

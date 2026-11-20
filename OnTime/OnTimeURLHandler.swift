@@ -12,6 +12,7 @@ enum OnTimeURLCommand: String {
   case skip
   case stop
   case clear
+  case settings
 }
 
 struct OnTimeURLAction: Equatable {
@@ -72,6 +73,9 @@ enum OnTimeURLHandler {
       return model.skipPomodoroPhase()
     case .stop, .clear:
       model.stop()
+      return true
+    case .settings:
+      // Handled by AppDelegate (needs UI); treat as acknowledged.
       return true
     }
   }

@@ -67,6 +67,7 @@
 		LG0100000000000000000002 /* OnTimeSettingsNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = LG0200000000000000000002 /* OnTimeSettingsNavigation.swift */; };
 		LG0100000000000000000003 /* OnTimeSettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = LG0200000000000000000003 /* OnTimeSettingsComponents.swift */; };
 		LG0100000000000000000004 /* OnTimeGeneralSettingsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = LG0200000000000000000004 /* OnTimeGeneralSettingsPane.swift */; };
+		NA0100000000000000000001 /* OnTimeNotificationAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = NA0200000000000000000001 /* OnTimeNotificationAuth.swift */; };
 		LG0100000000000000000005 /* OnTimeAppearanceSettingsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = LG0200000000000000000005 /* OnTimeAppearanceSettingsPane.swift */; };
 		LG0100000000000000000006 /* OnTimeTimerSettingsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = LG0200000000000000000006 /* OnTimeTimerSettingsPane.swift */; };
 		LG0100000000000000000007 /* OnTimeSoundSettingsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = LG0200000000000000000007 /* OnTimeSoundSettingsPane.swift */; };
@@ -156,6 +157,7 @@
 		LG0200000000000000000002 /* OnTimeSettingsNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeSettingsNavigation.swift; sourceTree = "<group>"; };
 		LG0200000000000000000003 /* OnTimeSettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeSettingsComponents.swift; sourceTree = "<group>"; };
 		LG0200000000000000000004 /* OnTimeGeneralSettingsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeGeneralSettingsPane.swift; sourceTree = "<group>"; };
+		NA0200000000000000000001 /* OnTimeNotificationAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeNotificationAuth.swift; sourceTree = "<group>"; };
 		LG0200000000000000000005 /* OnTimeAppearanceSettingsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeAppearanceSettingsPane.swift; sourceTree = "<group>"; };
 		LG0200000000000000000006 /* OnTimeTimerSettingsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeTimerSettingsPane.swift; sourceTree = "<group>"; };
 		LG0200000000000000000007 /* OnTimeSoundSettingsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnTimeSoundSettingsPane.swift; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 				LG0200000000000000000002 /* OnTimeSettingsNavigation.swift */,
 				LG0200000000000000000003 /* OnTimeSettingsComponents.swift */,
 				LG0200000000000000000004 /* OnTimeGeneralSettingsPane.swift */,
+				NA0200000000000000000001 /* OnTimeNotificationAuth.swift */,
 				LG0200000000000000000005 /* OnTimeAppearanceSettingsPane.swift */,
 				LG0200000000000000000006 /* OnTimeTimerSettingsPane.swift */,
 				LG0200000000000000000007 /* OnTimeSoundSettingsPane.swift */,
@@ -439,6 +442,7 @@
 				LG0100000000000000000002 /* OnTimeSettingsNavigation.swift in Sources */,
 				LG0100000000000000000003 /* OnTimeSettingsComponents.swift in Sources */,
 				LG0100000000000000000004 /* OnTimeGeneralSettingsPane.swift in Sources */,
+				NA0100000000000000000001 /* OnTimeNotificationAuth.swift in Sources */,
 				LG0100000000000000000005 /* OnTimeAppearanceSettingsPane.swift in Sources */,
 				LG0100000000000000000006 /* OnTimeTimerSettingsPane.swift in Sources */,
 				LG0100000000000000000007 /* OnTimeSoundSettingsPane.swift in Sources */,
@@ -620,7 +624,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ramiruwanigathunga.ontime;
 				PRODUCT_NAME = OnTime;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -662,7 +666,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ramiruwanigathunga.ontime;
 				PRODUCT_NAME = OnTime;
 				PROVISIONING_PROFILE_SPECIFIER = "";

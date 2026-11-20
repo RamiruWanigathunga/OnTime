@@ -176,6 +176,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSPopo
       let url = URL(string: urlString),
       let action = OnTimeURLHandler.parse(url)
     else { return }
+    if action.command == .settings {
+      openSettingsClosingPopover()
+      return
+    }
     _ = OnTimeURLHandler.perform(action, on: model)
   }
 

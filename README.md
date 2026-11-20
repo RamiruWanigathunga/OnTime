@@ -12,9 +12,9 @@ Natural-language countdowns, Pomodoro, stopwatch, stretch-to-set, Shortcuts / Ap
 
 ## Screenshots
 
-| Menu bar — countdown | Menu bar — Pomodoro |
-| :---: | :---: |
-| ![Natural-language countdown in the menu bar](images/menu-bar-countdown.webp) | ![Start Pomodoro from the menu bar](images/menu-bar-pomodoro.webp) |
+| Menu bar — countdown | Menu bar — Pomodoro | Stretch to set |
+| :---: | :---: | :---: |
+| ![Natural-language countdown in the menu bar](images/menu-bar-countdown.webp) | ![Start Pomodoro from the menu bar](images/menu-bar-pomodoro.webp) | ![Drag the menu bar icon to set a countdown](images/menu-bar-stretch.webp) |
 
 | Settings |
 | :---: |
@@ -87,6 +87,7 @@ details: [RELEASING.md](RELEASING.md).
 | `ontime://pause` / `ontime://resume` / `ontime://toggle` | Pause controls |
 | `ontime://skip` | Skip Pomodoro phase |
 | `ontime://stop` / `ontime://clear` | Clear timer |
+| `ontime://settings` | Open Settings |
 
 ## Siri, Shortcuts, and Apple Intelligence
 

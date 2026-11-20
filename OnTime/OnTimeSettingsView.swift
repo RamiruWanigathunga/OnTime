@@ -85,7 +85,7 @@ struct OnTimeSettingsView: View {
       OnTimeGeneralSettingsPane()
     case .appearance:
       OnTimeAppearanceSettingsPane()
-    case .timer:
+    case .pomodoro:
       OnTimeTimerSettingsPane()
     case .sound:
       OnTimeSoundSettingsPane()

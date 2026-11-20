@@ -28,6 +28,7 @@ final class URLHandlerTests: XCTestCase {
       OnTimeURLHandler.parse(URL(string: "ontime://start?d=10")!)?.duration ?? 0, 600, accuracy: 0.1)
     XCTAssertEqual(OnTimeURLHandler.parse(URL(string: "ontime://add?t=5m")!)?.command, .add)
     XCTAssertEqual(OnTimeURLHandler.parse(URL(string: "ontime://clear")!)?.command, .clear)
+    XCTAssertEqual(OnTimeURLHandler.parse(URL(string: "ontime://settings")!)?.command, .settings)
   }
 
   func testPerformStartAndAdd() {

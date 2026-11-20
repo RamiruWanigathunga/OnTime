@@ -100,21 +100,19 @@ struct OnTimeGeneralSettingsPane: View {
 
   private func refreshNotificationAuthorization() {
     guard showNotifications else { return }
-    let center = UNUserNotificationCenter.current()
-    center.getNotificationSettings { settings in
-      DispatchQueue.main.async {
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-          showNotificationsError = nil
-        case .notDetermined:
-          break
-        case .denied:
-          showNotifications = false
-          showNotificationsError = "Notifications are disabled in System Settings."
-        @unknown default:
-          showNotifications = false
-          showNotificationsError = "Notifications are unavailable."
-        }
+    OnTimeNotificationAuth.getSettings { settings in
+      switch settings.authorizationStatus {
+      case .authorized, .provisional, .ephemeral:
+        showNotificationsError = nil
+      case .notDetermined:
+        break
+      case .denied:
+        showNotifications = false
+        showNotificationsError =
+          "Notifications are off in System Settings. Open Notifications and enable OnTime."
+      @unknown default:
+        showNotifications = false
+        showNotificationsError = "Notifications are unavailable."
       }
     }
   }
@@ -125,30 +123,30 @@ struct OnTimeGeneralSettingsPane: View {
       return
     }
 
-    let center = UNUserNotificationCenter.current()
-    center.getNotificationSettings { settings in
-      DispatchQueue.main.async {
-        switch settings.authorizationStatus {
-        case .authorized, .provisional, .ephemeral:
-          showNotificationsError = nil
-        case .notDetermined:
-          center.requestAuthorization(options: [.alert]) { granted, _ in
-            DispatchQueue.main.async {
-              if granted {
-                showNotificationsError = nil
-              } else {
-                showNotifications = false
-                showNotificationsError = "Notifications are disabled in System Settings."
-              }
-            }
+    OnTimeNotificationAuth.getSettings { settings in
+      switch settings.authorizationStatus {
+      case .authorized, .provisional, .ephemeral:
+        showNotificationsError = nil
+      case .notDetermined:
+        // Accessory apps often never show the permission sheet without this.
+        OnTimeNotificationAuth.requestAuthorization { granted in
+          if granted {
+            showNotificationsError = nil
+          } else {
+            showNotifications = false
+            showNotificationsError =
+              "Notifications were not allowed. You can enable OnTime in System Settings."
+            OnTimeNotificationAuth.openSystemSettings()
           }
-        case .denied:
-          showNotifications = false
-          showNotificationsError = "Notifications are disabled in System Settings."
-        @unknown default:
-          showNotifications = false
-          showNotificationsError = "Notifications are unavailable."
         }
+      case .denied:
+        showNotifications = false
+        showNotificationsError =
+          "Notifications are off in System Settings. Opening Notifications…"
+        OnTimeNotificationAuth.openSystemSettings()
+      @unknown default:
+        showNotifications = false
+        showNotificationsError = "Notifications are unavailable."
       }
     }
   }
