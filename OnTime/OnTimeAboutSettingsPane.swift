@@ -51,7 +51,10 @@ struct OnTimeAboutSettingsPane: View {
 
         SettingsRow(title: "Updates") {
           Button("Check for Updates…") {
-            (NSApp.delegate as? AppDelegate)?.checkForUpdatesFromSettings()
+            // Don't go through NSApp.delegate — with SwiftUI's
+            // NSApplicationDelegateAdaptor the cast to AppDelegate often fails
+            // and this button would silently do nothing.
+            OnTimeUpdater.shared.checkForUpdates()
           }
           .buttonStyle(.bordered)
           .controlSize(.small)
