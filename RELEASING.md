@@ -38,36 +38,48 @@ Optional export for CI (keep the file out of git):
 
 Add local key paths to `.gitignore` if you keep exports on disk.
 
-## Per-release: GitHub + Sparkle (default path)
+## Per-release: GitHub Actions + Sparkle (default path)
 
-Automatic checks are **off** (`SUEnableAutomaticChecks` = false) until you
-publish the first signed item in `appcast.xml`. Users can still use
-**Settings → About → Check for Updates…**.
+Pushing a version tag builds the app on GitHub Actions, attaches **ZIP + DMG**
+to a GitHub Release, Sparkle-signs the ZIP, and updates [`appcast.xml`](appcast.xml)
+on `main`.
 
-1. Bump **Version** and **Build** in Xcode (OnTime target → General).
-2. Archive or build a Release `OnTime.app` (Personal Team or ad-hoc is fine for
-   this path; users may need Gatekeeper **Open Anyway** — document that in the
-   release notes).
-3. Zip the app (preserve symlinks):
+**One-time CI secret** (already set if you used `gh secret set`):
+
+```bash
+# Export private key from your Mac Keychain (never commit this file)
+./path/to/Sparkle/bin/generate_keys -x ed25519-private.pem
+gh secret set SPARKLE_PRIVATE_KEY --repo RamiruWanigathunga/OnTime < ed25519-private.pem
+rm ed25519-private.pem
+```
+
+Automatic checks are **off** (`SUEnableAutomaticChecks` = false). Users can use
+**Settings → About → Check for Updates…**. Turn automatic checks on in a later
+build once the first appcast item is live.
+
+### Cut a release
+
+1. Ensure `main` is clean and pushed.
+2. Tag and push (marketing version = tag without `v`):
 
    ```bash
-   ditto -c -k --sequesterRsrc --keepParent OnTime.app OnTime-vX.Y.Z.zip
+   git tag v1.0.0
+   git push origin v1.0.0
    ```
 
-4. Sign the ZIP with Sparkle:
+3. Watch **Actions → Release**. When green, the Release page has
+   `OnTime-vX.Y.Z.zip` + `OnTime-vX.Y.Z.dmg`, and `appcast.xml` on `main` has a
+   new item. Build number = Actions `run_number` (always increasing for Sparkle).
 
-   ```bash
-   ./bin/sign_update OnTime-vX.Y.Z.zip
-   ```
+### Manual local packaging (optional)
 
-   Copy the printed `sparkle:edSignature` and file length.
-5. Create a GitHub Release `vX.Y.Z`, upload `OnTime-vX.Y.Z.zip`.
-6. Append an `<item>` to [`appcast.xml`](appcast.xml) (see template below). Commit
-   and push `appcast.xml` on `main` so
-   `https://raw.githubusercontent.com/RamiruWanigathunga/OnTime/main/appcast.xml`
-   updates.
-7. After the first successful item, you may set `SUEnableAutomaticChecks` to
-   `true` in `Info.plist` for subsequent builds if you want background checks.
+```bash
+# After a local Release build of OnTime.app:
+ditto -c -k --sequesterRsrc --keepParent OnTime.app OnTime-vX.Y.Z.zip
+bash scripts/make-dmg.sh OnTime.app dist/OnTime-vX.Y.Z.dmg
+# Sign ZIP (uses Keychain):
+sign_update OnTime-vX.Y.Z.zip
+```
 
 ### Appcast item template
 

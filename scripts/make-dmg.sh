@@ -36,9 +36,6 @@ if [[ -f "${OUT_PATH}" ]]; then
   rm -f "${OUT_PATH}"
 fi
 
-touch "build/.metadata_never_index" 2>/dev/null || true
-touch "build/Build/.metadata_never_index" 2>/dev/null || true
-
 hdiutil create \
   -volname "${VOLUME_NAME}" \
   -srcfolder "${STAGING_DIR}" \
@@ -46,12 +43,9 @@ hdiutil create \
   -format UDZO \
   "${OUT_PATH}"
 
-if [[ -z "${SIGNING_IDENTITY:-}" ]]; then
-  echo "SIGNING_IDENTITY is required to sign the DMG." >&2
-  exit 1
+if [[ -n "${SIGNING_IDENTITY:-}" ]]; then
+  codesign --force --sign "${SIGNING_IDENTITY}" "${OUT_PATH}"
+  echo "Signed ${OUT_PATH}"
+else
+  echo "Created unsigned ${OUT_PATH} (set SIGNING_IDENTITY to codesign)."
 fi
-
-codesign --force --sign "${SIGNING_IDENTITY}" "${OUT_PATH}"
-echo "Signed ${OUT_PATH}"
-
-echo "Created ${OUT_PATH}"

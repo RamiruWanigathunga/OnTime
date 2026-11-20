@@ -8,12 +8,13 @@ on:
 jobs:
   build-release:
     # Xcode 26 actool/ibtoold crashes on macOS 15 hosts (AssetCatalogAgent).
-    # Use macos-26 so the .icon / asset catalog compile matches the toolchain.
     runs-on: macos-26
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Select Xcode 26.1.1
         uses: maxim-lobanov/setup-xcode@v1
@@ -28,9 +29,17 @@ jobs:
             exit 1
           fi
 
-      - name: Build app (unsigned)
+      - name: Resolve version
+        id: meta
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
+          # Sparkle compares integer build numbers; run_number always increases.
+          BUILD="${{ github.run_number }}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "build=${BUILD}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build app (unsigned)
+        run: |
           xcodebuild \
             -project OnTime.xcodeproj \
             -scheme OnTime \
@@ -38,13 +47,13 @@ jobs:
             -destination 'generic/platform=macOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
-            MARKETING_VERSION="${VERSION}" \
-            CURRENT_PROJECT_VERSION=1
+            MARKETING_VERSION="${{ steps.meta.outputs.version }}" \
+            CURRENT_PROJECT_VERSION="${{ steps.meta.outputs.build }}"
 
-      - name: Package ZIP
+      - name: Package ZIP + DMG
         id: package
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${{ steps.meta.outputs.version }}"
           APP="build/Build/Products/Release/OnTime.app"
           if [[ ! -d "${APP}" ]]; then
             echo "Built app not found at ${APP}" >&2
@@ -53,28 +62,67 @@ jobs:
           fi
           mkdir -p dist
           ZIP="dist/OnTime-v${VERSION}.zip"
+          DMG="dist/OnTime-v${VERSION}.dmg"
           ditto -c -k --sequesterRsrc --keepParent "${APP}" "${ZIP}"
-          ls -lh "${ZIP}"
-          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          bash scripts/make-dmg.sh "${APP}" "${DMG}"
+          ls -lh "${ZIP}" "${DMG}"
           echo "zip=${ZIP}" >> "${GITHUB_OUTPUT}"
+          echo "dmg=${DMG}" >> "${GITHUB_OUTPUT}"
+          echo "zip_bytes=$(stat -f%z "${ZIP}")" >> "${GITHUB_OUTPUT}"
+
+      - name: Sign ZIP for Sparkle
+        id: sparkle
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          if [[ -z "${SPARKLE_PRIVATE_KEY}" ]]; then
+            echo "SPARKLE_PRIVATE_KEY secret is not set." >&2
+            echo "Export with Sparkle generate_keys -x and:" >&2
+            echo "  gh secret set SPARKLE_PRIVATE_KEY < ed25519-private.pem" >&2
+            exit 1
+          fi
+          SIGN_UPDATE="$(find build/SourcePackages -path '*/Sparkle/bin/sign_update' -type f | head -1)"
+          if [[ -z "${SIGN_UPDATE}" || ! -x "${SIGN_UPDATE}" ]]; then
+            echo "sign_update not found under build/SourcePackages" >&2
+            find build/SourcePackages -name sign_update 2>/dev/null || true
+            exit 1
+          fi
+          KEY_FILE="$(mktemp)"
+          printf '%s\n' "${SPARKLE_PRIVATE_KEY}" > "${KEY_FILE}"
+          # -p prints signature only; full output includes length= for appcast.
+          FULL="$("${SIGN_UPDATE}" --ed-key-file "${KEY_FILE}" "${{ steps.package.outputs.zip }}")"
+          rm -f "${KEY_FILE}"
+          echo "${FULL}"
+          SIG="$(echo "${FULL}" | sed -n 's/.*edSignature="\([^"]*\)".*/\1/p' | head -1)"
+          if [[ -z "${SIG}" ]]; then
+            # Newer sign_update may print: sparkle:edSignature="..." length="..."
+            SIG="$(echo "${FULL}" | grep -oE '[A-Za-z0-9+/=]{40,}' | head -1)"
+          fi
+          if [[ -z "${SIG}" ]]; then
+            echo "Could not parse EdDSA signature from sign_update output." >&2
+            exit 1
+          fi
+          echo "ed_signature=${SIG}" >> "${GITHUB_OUTPUT}"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: OnTime ${{ steps.package.outputs.version }}
+          name: OnTime ${{ steps.meta.outputs.version }}
           fail_on_unmatched_files: true
-          generate_release_notes: false
-          files: ${{ steps.package.outputs.zip }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.package.outputs.zip }}
+            ${{ steps.package.outputs.dmg }}
           body: |
-            ## OnTime ${{ steps.package.outputs.version }}
+            ## OnTime ${{ steps.meta.outputs.version }}
 
             Privacy-first menu-bar timer for macOS — natural-language countdowns, Pomodoro, stopwatch, stretch-to-set, Shortcuts / App Intents, and local session logging. No accounts, no cloud.
 
             ### Install
 
-            1. Download **`OnTime-v${{ steps.package.outputs.version }}.zip`** from Assets below.
-            2. Unzip, then drag **`OnTime.app`** into **Applications**.
-            3. Launch OnTime from `/Applications`.
+            **Preferred:** download **`OnTime-v${{ steps.meta.outputs.version }}.dmg`**, open it, drag **OnTime** into **Applications**.
+
+            Or use **`OnTime-v${{ steps.meta.outputs.version }}.zip`** (also used by in-app Sparkle updates).
 
             > [!IMPORTANT]
             > **Gatekeeper (unsigned / non-notarized build)**
@@ -88,9 +136,33 @@ jobs:
 
             macOS 14 (Sonoma) or later.
 
-            ### Links
+            ### Updates
 
-            - Repository: https://github.com/RamiruWanigathunga/OnTime
-            - Docs: [README](https://github.com/RamiruWanigathunga/OnTime#readme) · [RELEASING](https://github.com/RamiruWanigathunga/OnTime/blob/main/RELEASING.md)
+            Installed copies can use **Settings → About → Check for Updates…** (Sparkle). Background checks stay off until you enable them in a later build.
 
-            In-app Sparkle updates will light up once the first EdDSA-signed appcast item is published (see RELEASING.md).
+      - name: Update appcast on main
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          BUILD: ${{ steps.meta.outputs.build }}
+          ZIP_BYTES: ${{ steps.package.outputs.zip_bytes }}
+          ED_SIG: ${{ steps.sparkle.outputs.ed_signature }}
+        run: |
+          ZIP_URL="https://github.com/RamiruWanigathunga/OnTime/releases/download/v${VERSION}/OnTime-v${VERSION}.zip"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          python3 scripts/update_appcast.py \
+            appcast.xml \
+            "${VERSION}" \
+            "${BUILD}" \
+            "${ZIP_URL}" \
+            "${ZIP_BYTES}" \
+            "${ED_SIG}"
+          if git diff --quiet appcast.xml; then
+            echo "appcast.xml unchanged"
+            exit 0
+          fi
+          git add appcast.xml
+          git commit -m "chore: appcast for v${VERSION}"
+          git push origin main
