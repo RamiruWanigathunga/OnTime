@@ -1,0 +1,27 @@
+.DS_Store
+xcuserdata/
+DerivedData/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+build/
+dist/
+node_modules/
+buildServer.json
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Sparkle signing — never commit private keys or local exports
+ed25519-private*.pem
+*.sparkle-private
+sparkle-private/
+bin/generate_keys
+bin/sign_update
+
+# Coverage / profiling noise
+default.profraw
+*.profraw

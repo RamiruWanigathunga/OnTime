@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement or new capability for OnTime
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem you want solved, not only the solution. Menu-bar and privacy-first constraints apply.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / use case
+      description: What are you trying to do today that is awkward or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed idea
+      description: How should OnTime behave? Mockups or short clips help.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional — workarounds, other apps, or settings you already tried
+    validations:
+      required: false

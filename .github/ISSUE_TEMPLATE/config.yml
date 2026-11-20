@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/RamiruWanigathunga/OnTime/security/advisories/new
+    about: Please report security issues privately — do not file a public issue.
+  - name: Discussions / questions
+    url: https://github.com/RamiruWanigathunga/OnTime/issues/new?template=feature_request.yml
+    about: For product ideas, use a feature request. For support questions, prefer a clear bug report if something is broken.
