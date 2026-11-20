@@ -5,6 +5,24 @@
     <link>https://raw.githubusercontent.com/RamiruWanigathunga/OnTime/main/appcast.xml</link>
     <description>Most recent updates to OnTime</description>
     <language>en</language>
-    <!-- No items yet. First public ZIP + sign_update signature go here. See RELEASING.md. -->
-  </channel>
+
+    <item>
+      <title>Version 1.0.0</title>
+      <link>https://github.com/RamiruWanigathunga/OnTime/releases/tag/v1.0.0</link>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+      <description><![CDATA[
+        <h2>OnTime 1.0.0</h2><ul><li>Maintenance and improvements.</li></ul>
+      ]]></description>
+      <pubDate>Fri, 20 Nov 2026 18:10:48 +0000</pubDate>
+      <enclosure
+        url="https://github.com/RamiruWanigathunga/OnTime/releases/download/v1.0.0/OnTime-v1.0.0.zip"
+        sparkle:version="1"
+        sparkle:shortVersionString="1.0.0"
+        sparkle:edSignature="RoqNQV9JXRXJLbTr10QUFsj+6zVsH2eXf1myL3VQln79/l+p4pIFTOu91XP+tZx4Ue4d3//2ihe2o0nnkXEnBA=="
+        length="14601430"
+        type="application/octet-stream" />
+    </item>
+
+</channel>
 </rss>
