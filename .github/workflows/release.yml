@@ -87,9 +87,17 @@ jobs:
 
           ditto -c -k --sequesterRsrc --keepParent "${APP}" "${ZIP}"
           bash scripts/make-dmg.sh "${APP}" "${DMG}"
-          ls -lh "${ZIP}" "${DMG}"
+
+          # Stable aliases for /releases/latest/download/OnTime.{zip,dmg}
+          # (always-latest URLs). Versioned names stay for history + Sparkle.
+          cp "${ZIP}" dist/OnTime.zip
+          cp "${DMG}" dist/OnTime.dmg
+
+          ls -lh "${ZIP}" "${DMG}" dist/OnTime.zip dist/OnTime.dmg
           echo "zip=${ZIP}" >> "${GITHUB_OUTPUT}"
           echo "dmg=${DMG}" >> "${GITHUB_OUTPUT}"
+          echo "zip_alias=dist/OnTime.zip" >> "${GITHUB_OUTPUT}"
+          echo "dmg_alias=dist/OnTime.dmg" >> "${GITHUB_OUTPUT}"
           echo "zip_bytes=$(stat -f%z "${ZIP}")" >> "${GITHUB_OUTPUT}"
 
       - name: Sign ZIP for Sparkle
@@ -135,6 +143,8 @@ jobs:
           files: |
             ${{ steps.package.outputs.zip }}
             ${{ steps.package.outputs.dmg }}
+            ${{ steps.package.outputs.zip_alias }}
+            ${{ steps.package.outputs.dmg_alias }}
           body: |
             ## OnTime ${{ steps.meta.outputs.version }}
 
@@ -142,9 +152,24 @@ jobs:
 
             ### Install
 
-            **Preferred:** download **`OnTime-v${{ steps.meta.outputs.version }}.dmg`**, open it, drag **OnTime** into **Applications**.
+            **Always-latest downloads** (this release while it is latest):
 
-            Or use **`OnTime-v${{ steps.meta.outputs.version }}.zip`** (also used by in-app Sparkle updates).
+            - DMG: https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.dmg
+            - ZIP: https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.zip
+
+            **This version only:** `OnTime-v${{ steps.meta.outputs.version }}.dmg` / `OnTime-v${{ steps.meta.outputs.version }}.zip` (Sparkle uses the versioned ZIP). Older versions stay on the [Releases](https://github.com/RamiruWanigathunga/OnTime/releases) page.
+
+            **Terminal (ZIP + clear quarantine):**
+
+            ```bash
+            curl -fsSL -o /tmp/OnTime.zip https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.zip \
+            && rm -rf /tmp/OnTime-extract \
+            && ditto -x -k /tmp/OnTime.zip /tmp/OnTime-extract \
+            && rm -rf /Applications/OnTime.app \
+            && mv /tmp/OnTime-extract/OnTime.app /Applications/ \
+            && xattr -cr /Applications/OnTime.app \
+            && open /Applications/OnTime.app
+            ```
 
             > [!IMPORTANT]
             > **Gatekeeper (ad-hoc / non-notarized build)**

@@ -40,9 +40,27 @@ Add local key paths to `.gitignore` if you keep exports on disk.
 
 ## Per-release: GitHub Actions + Sparkle (default path)
 
-Pushing a version tag builds the app on GitHub Actions, attaches **ZIP + DMG**
-to a GitHub Release, Sparkle-signs the ZIP, and updates [`appcast.xml`](appcast.xml)
-on `main`.
+Pushing a version tag builds the app on GitHub Actions, attaches **versioned
+ZIP + DMG** plus **stable aliases** (`OnTime.zip` / `OnTime.dmg`), Sparkle-signs
+the versioned ZIP, and updates [`appcast.xml`](appcast.xml) on `main`.
+
+### Always-latest download aliases
+
+Each release uploads four assets:
+
+| Asset | Purpose |
+| --- | --- |
+| `OnTime-vX.Y.Z.zip` / `.dmg` | History, Sparkle enclosure URL, pinning a version |
+| `OnTime.zip` / `OnTime.dmg` | Stable names on that release |
+
+While a release is **latest**, these URLs always resolve to its aliases:
+
+- https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.dmg
+- https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.zip
+
+When you ship `v1.5.3`, those same URLs point at `1.5.3`. Older tags (e.g.
+`v1.5.2`) keep their versioned files on the Releases page. Sparkle continues to
+use the **versioned** ZIP URL in `appcast.xml`.
 
 **One-time CI secret** (already set if you used `gh secret set`):
 
@@ -70,13 +88,25 @@ build once the first appcast item is live.
    git push origin v1.0.0
    ```
 
-4. Watch **Actions → Release**. When green: ZIP + DMG on the Release page, and
-   a new `appcast.xml` item on `main`.
+4. Watch **Actions → Release**. When green: versioned + alias ZIP/DMG on the
+   Release page, and a new `appcast.xml` item on `main`.
 
 Release builds use Xcode ad-hoc signing (`CODE_SIGN_IDENTITY=-`), same as
 GitStreak — that re-seals Sparkle after header stripping. CI verifies with
 `codesign --verify --deep --strict`. Sparkle updates use **EdDSA**. Without
 notarization, first browser install may need `xattr -cr /Applications/OnTime.app`.
+
+**Terminal install (always latest ZIP):**
+
+```bash
+curl -fsSL -o /tmp/OnTime.zip https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.zip \
+&& rm -rf /tmp/OnTime-extract \
+&& ditto -x -k /tmp/OnTime.zip /tmp/OnTime-extract \
+&& rm -rf /Applications/OnTime.app \
+&& mv /tmp/OnTime-extract/OnTime.app /Applications/ \
+&& xattr -cr /Applications/OnTime.app \
+&& open /Applications/OnTime.app
+```
 
 ### Manual local packaging (optional)
 
@@ -139,6 +169,7 @@ version/build numbering independent from GitHub releases if you ship both.
 - [ ] Version + build bumped
 - [ ] ZIP created with `ditto`
 - [ ] `sign_update` signature + length recorded
-- [ ] GitHub Release uploaded
-- [ ] `appcast.xml` updated on `main`
+- [ ] GitHub Release uploaded (versioned + `OnTime.zip` / `OnTime.dmg` aliases)
+- [ ] `appcast.xml` updated on `main` (versioned ZIP URL)
+- [ ] Smoke-test always-latest URLs resolve to this release
 - [ ] Smoke-test: install previous build → Check for Updates → installs new ZIP
