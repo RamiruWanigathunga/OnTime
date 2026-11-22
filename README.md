@@ -6,6 +6,11 @@
 
 ### Privacy-first menu-bar timer for macOS
 
+[![Downloads](https://img.shields.io/github/downloads/RamiruWanigathunga/OnTime/total?style=flat-square&color=a855f7&labelColor=0d1117)](https://github.com/RamiruWanigathunga/OnTime/releases)
+[![Release](https://img.shields.io/github/v/release/RamiruWanigathunga/OnTime?style=flat-square&color=22c55e&labelColor=0d1117)](https://github.com/RamiruWanigathunga/OnTime/releases/latest)
+[![macOS](https://img.shields.io/badge/macOS-14%2B-0d1117?style=flat-square&labelColor=0d1117&color=7060f8)](https://tryontime.vercel.app)
+[![Website](https://img.shields.io/badge/website-tryontime-0d1117?style=flat-square&labelColor=0d1117&color=7060f8)](https://tryontime.vercel.app)
+
 Natural-language countdowns, Pomodoro, stopwatch, stretch-to-set, Shortcuts / App Intents, and local session logging — no accounts, no cloud.
 
 </div>
@@ -40,12 +45,32 @@ macOS 14 (Sonoma) or later.
 
 ## Installation
 
-### Option 1: Download (when a release is published)
+### Option 1: Download (always latest)
 
-1. Download the latest disk image or ZIP from
-   [Releases](https://github.com/RamiruWanigathunga/OnTime/releases/latest).
-2. Open the archive and **drag `OnTime.app` into Applications**.
-3. Launch OnTime from `/Applications`.
+Stable URLs always point at the newest GitHub Release assets:
+
+- [OnTime.dmg](https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.dmg)
+- [OnTime.zip](https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.zip)
+
+Open the DMG (or unzip), **drag `OnTime.app` into Applications**, then launch
+from `/Applications`. Older versions stay on the
+[Releases](https://github.com/RamiruWanigathunga/OnTime/releases) page as
+`OnTime-vX.Y.Z.dmg` / `.zip`.
+
+### Option 2: Terminal install
+
+Downloads the latest ZIP, installs to Applications, clears Gatekeeper
+quarantine, and opens the app:
+
+```bash
+curl -fsSL -o /tmp/OnTime.zip https://github.com/RamiruWanigathunga/OnTime/releases/latest/download/OnTime.zip \
+&& rm -rf /tmp/OnTime-extract \
+&& ditto -x -k /tmp/OnTime.zip /tmp/OnTime-extract \
+&& rm -rf /Applications/OnTime.app \
+&& mv /tmp/OnTime-extract/OnTime.app /Applications/ \
+&& xattr -cr /Applications/OnTime.app \
+&& open /Applications/OnTime.app
+```
 
 > [!IMPORTANT]
 > **Gatekeeper (ad-hoc / non-notarized builds)**
@@ -65,7 +90,7 @@ macOS 14 (Sonoma) or later.
 > 3. Or right-click the app → **Open** → **Open**, or use **System Settings →
 >    Privacy & Security → Open Anyway**.
 
-### Option 2: Build from source
+### Option 3: Build from source
 
 ```bash
 git clone https://github.com/RamiruWanigathunga/OnTime.git
